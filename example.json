@@ -1,0 +1,9 @@
+{
+  "source": "nwpc_grapes_gfs",
+  "type": "prod_grib2",
+  "status": "0",
+  "datetime": 1561363080430,
+  "fileName": "gmf.gra.2019062400006.grb2",
+  "absoluteDataName": "/g2/nwp_pd/NWP_PST_DATA/GMF_GRAPES_GFS_POST/togrib2/output_togrib2/2019062400/gmf.gra.2019062400006.grb2",
+  "desc": "{\"start_time\": \"2019062400\", \"forecast_time\":\"000\"}"
+}
