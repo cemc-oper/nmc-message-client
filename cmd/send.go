@@ -75,10 +75,10 @@ var sendCmd = &cobra.Command{
 			Description:      string(descriptionBlob),
 		}
 
-		monitorMessageBlob, err2 := json.Marshal(monitorMessage)
+		monitorMessageBlob, err := json.Marshal(monitorMessage)
 
-		if err2 != nil {
-			fmt.Fprintf(os.Stderr, "create message error: %s\n", err2)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "create message error: %s\n", err)
 			os.Exit(2)
 		}
 
@@ -90,10 +90,10 @@ var sendCmd = &cobra.Command{
 		if debug {
 			fmt.Println("connect to kafka server...")
 		}
-		conn, err3 := kafka.DialLeader(context.Background(), "tcp", target, topic, 0)
+		conn, err := kafka.DialLeader(context.Background(), "tcp", target, topic, 0)
 
-		if err3 != nil {
-			fmt.Fprintf(os.Stderr, "connection can't create: %s\n", err3)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "connection can't create: %s\n", err)
 			os.Exit(3)
 		}
 
@@ -106,14 +106,19 @@ var sendCmd = &cobra.Command{
 		if debug {
 			fmt.Println("send message...")
 		}
-		conn.WriteMessages(
+
+		count, err := conn.WriteMessages(
 			kafka.Message{
 				Value: monitorMessageBlob,
 			},
 		)
-		if debug {
-			fmt.Println("send message...done")
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "send message failed: %s", err)
+			os.Exit(4)
 		}
+
+		fmt.Printf("send message successful: %d bytes\n", count)
 
 		if debug {
 			fmt.Println("close connection...")
