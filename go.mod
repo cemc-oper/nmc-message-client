@@ -23,7 +23,7 @@ require (
 	github.com/rogpeppe/fastuuid v1.1.0 // indirect
 	github.com/russross/blackfriday v2.0.0+incompatible // indirect
 	github.com/schollz/progressbar/v2 v2.13.2 // indirect
-	github.com/segmentio/kafka-go v0.2.4 // indirect
+	github.com/segmentio/kafka-go v0.2.4
 	github.com/sirupsen/logrus v1.4.2 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/afero v1.2.2 // indirect
