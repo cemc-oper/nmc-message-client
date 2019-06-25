@@ -88,26 +88,25 @@ var sendCmd = &cobra.Command{
 		}
 
 		if debug {
-			fmt.Println("connect to kafka server...")
+			fmt.Println("create writer...")
 		}
-		conn, err := kafka.DialLeader(context.Background(), "tcp", target, topic, 0)
 
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "connection can't create: %s\n", err)
-			os.Exit(3)
-		}
+		w := kafka.NewWriter(kafka.WriterConfig{
+			Brokers:      []string{target},
+			Topic:        topic,
+			Balancer:     &kafka.LeastBytes{},
+			WriteTimeout: 10 * time.Second,
+		})
 
 		if debug {
-			fmt.Println("connect to kafka server...done")
+			fmt.Println("create writer...done")
 		}
-
-		conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
 
 		if debug {
 			fmt.Println("send message...")
 		}
 
-		count, err := conn.WriteMessages(
+		err = w.WriteMessages(context.Background(),
 			kafka.Message{
 				Value: monitorMessageBlob,
 			},
@@ -118,14 +117,14 @@ var sendCmd = &cobra.Command{
 			os.Exit(4)
 		}
 
-		fmt.Printf("send message successful: %d bytes\n", count)
+		fmt.Printf("send message successful\n")
 
 		if debug {
-			fmt.Println("close connection...")
+			fmt.Println("close writer...")
 		}
-		conn.Close()
+		w.Close()
 		if debug {
-			fmt.Println("close connection...done")
+			fmt.Println("close writer...done")
 		}
 	},
 }
