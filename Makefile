@@ -6,8 +6,8 @@ GIT_COMMIT := $(shell git rev-parse --short HEAD 2> /dev/null || true)
 
 nmc_monitor_client:
 	go build \
-		-ldflags "-X \"github.com/perillaroc/ecflow-client-go/ecflow_checker/cmd.Version=${VERSION}\" \
-        -X \"github.com/perillaroc/ecflow-client-go/ecflow_checker/cmd.BuildTime=${BUILD_TIME}\" \
-        -X \"github.com/perillaroc/ecflow-client-go/ecflow_checker/cmd.GitCommit=${GIT_COMMIT}\" " \
-		-o bin/nmc_monitor_client
+		-ldflags "-X \"github.com/nwpc-oper/nmc-monitor-client-go/cmd.Version=${VERSION}\" \
+        -X \"github.com/nwpc-oper/nmc-monitor-client-go/cmd.BuildTime=${BUILD_TIME}\" \
+        -X \"github.com/nwpc-oper/nmc-monitor-client-go/cmd.GitCommit=${GIT_COMMIT}\" " \
+		-o bin/nmc_monitor_client \
 		main.go
