@@ -34,7 +34,7 @@ func init() {
 	currentTimeStamp := makeTimestamp()
 
 	sendCmd.Flags().StringVar(&target, "target", "", "send target")
-	sendCmd.Flags().StringVar(&topic, "topic", "MonitorMessge", "message topic")
+	sendCmd.Flags().StringVar(&topic, "topic", "monitor", "message topic")
 	sendCmd.Flags().StringVar(&source, "source", "", "message source")
 	sendCmd.Flags().StringVar(&messageType, "type", "", "message type")
 	sendCmd.Flags().StringVar(&status, "status", "0", "status")
