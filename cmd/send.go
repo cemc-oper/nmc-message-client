@@ -26,6 +26,7 @@ var (
 	startTime        = ""
 	forecastTime     = ""
 	debug            = false
+	disableSend      = false
 )
 
 func init() {
@@ -44,6 +45,7 @@ func init() {
 	sendCmd.Flags().StringVar(&startTime, "start-time", "", "start time, such as 2019062400")
 	sendCmd.Flags().StringVar(&forecastTime, "forecast-time", "", "forecast time, such as 000")
 	sendCmd.Flags().BoolVar(&debug, "debug", false, "show debug information")
+	sendCmd.Flags().BoolVar(&disableSend, "disable-send", false, "disable message send.")
 
 	sendCmd.MarkFlagRequired("target")
 	sendCmd.MarkFlagRequired("source")
@@ -55,6 +57,11 @@ var sendCmd = &cobra.Command{
 	Short: "Send message to NMC Monitor",
 	Long:  "Send message to NMC Monitor",
 	Run: func(cmd *cobra.Command, args []string) {
+		if debug {
+			fmt.Printf("Version %s (%s)\n", Version, GitCommit)
+			fmt.Printf("Build at %s\n", BuildTime)
+		}
+
 		description := MessageDescription{
 			StartTime:    startTime,
 			ForecastTime: forecastTime,
@@ -75,7 +82,7 @@ var sendCmd = &cobra.Command{
 			Description:      string(descriptionBlob),
 		}
 
-		monitorMessageBlob, err := json.Marshal(monitorMessage)
+		monitorMessageBlob, err := json.MarshalIndent(monitorMessage, "", "  ")
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "create message error: %s\n", err)
@@ -85,6 +92,14 @@ var sendCmd = &cobra.Command{
 		if debug {
 			fmt.Printf("message:\n")
 			fmt.Printf("%s\n", monitorMessageBlob)
+		}
+
+		if disableSend {
+			if debug {
+				fmt.Printf("disable send.\n")
+				fmt.Printf("Bye.\n")
+			}
+			return
 		}
 
 		if debug {
