@@ -148,13 +148,13 @@ type MonitorMessage struct {
 	Source           string `json:"source"`
 	MessageType      string `json:"type"`
 	Status           string `json:"status"`
-	DateTime         int64  `json:"datetime"`
+	DateTime         int64  `json:"datetime,omitempty"`
 	FileName         string `json:"fileName"`
-	AbsoluteDataName string `json:"absoluteDataName"`
-	Description      string `json:"desc"`
+	AbsoluteDataName string `json:"absoluteDataName,omitempty"`
+	Description      string `json:"desc,omitempty"`
 }
 
 type MessageDescription struct {
-	StartTime    string `json:"startTime"`
-	ForecastTime string `json:"forecastTime"`
+	StartTime    string `json:"startTime,omitempty"`
+	ForecastTime string `json:"forecastTime,omitempty"`
 }
