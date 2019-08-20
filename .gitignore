@@ -140,4 +140,4 @@ dmypy.json
 # vendor/
 
 .idea/
-./bin/
+bin/
