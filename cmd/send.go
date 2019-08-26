@@ -128,7 +128,7 @@ var sendCmd = &cobra.Command{
 		)
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "send message failed: %s", err)
+			fmt.Fprintf(os.Stderr, "send message failed: %s\n", err)
 			os.Exit(4)
 		}
 
