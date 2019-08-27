@@ -27,6 +27,7 @@ var (
 	forecastTime     = ""
 	debug            = false
 	disableSend      = false
+	ignoreError      = false
 )
 
 func init() {
@@ -46,6 +47,8 @@ func init() {
 	sendCmd.Flags().StringVar(&forecastTime, "forecast-time", "", "forecast time, such as 000")
 	sendCmd.Flags().BoolVar(&debug, "debug", false, "show debug information")
 	sendCmd.Flags().BoolVar(&disableSend, "disable-send", false, "disable message send.")
+	sendCmd.Flags().BoolVar(&ignoreError, "ignore-error", false,
+		"ignore error. Should be open in operation systems.")
 
 	sendCmd.MarkFlagRequired("target")
 	sendCmd.MarkFlagRequired("source")
@@ -68,8 +71,14 @@ var sendCmd = &cobra.Command{
 		}
 		descriptionBlob, err := json.Marshal(description)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "create description error: %s\n", err)
-			os.Exit(2)
+			f := os.Stderr
+			returnCode := 2
+			if ignoreError {
+				f = os.Stdout
+				returnCode = 0
+			}
+			fmt.Fprintf(f, "create description error: %s\n", err)
+			os.Exit(returnCode)
 		}
 
 		monitorMessage := MonitorMessage{
@@ -85,8 +94,14 @@ var sendCmd = &cobra.Command{
 		monitorMessageBlob, err := json.MarshalIndent(monitorMessage, "", "  ")
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "create message error: %s\n", err)
-			os.Exit(2)
+			f := os.Stderr
+			returnCode := 2
+			if ignoreError {
+				f = os.Stdout
+				returnCode = 0
+			}
+			fmt.Fprintf(f, "create message error: %s\n", err)
+			os.Exit(returnCode)
 		}
 
 		if debug {
@@ -128,8 +143,14 @@ var sendCmd = &cobra.Command{
 		)
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "send message failed: %s\n", err)
-			os.Exit(4)
+			f := os.Stderr
+			returnCode := 4
+			if ignoreError {
+				f = os.Stdout
+				returnCode = 0
+			}
+			fmt.Fprintf(f, "send message failed: %s\n", err)
+			os.Exit(returnCode)
 		}
 
 		fmt.Printf("send message successful\n")
