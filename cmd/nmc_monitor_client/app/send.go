@@ -1,10 +1,9 @@
 package app
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/segmentio/kafka-go"
+	"github.com/nwpc-oper/nmc-monitor-client-go/sender"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"log"
@@ -162,30 +161,14 @@ var sendCmd = &cobra.Command{
 			return
 		}
 
-		if debug {
-			fmt.Println("create writer...")
-		}
-
-		w := kafka.NewWriter(kafka.WriterConfig{
-			Brokers:      []string{target},
-			Topic:        topic,
-			Balancer:     &kafka.LeastBytes{},
-			WriteTimeout: 10 * time.Second,
-		})
-
-		if debug {
-			fmt.Println("create writer...done")
-		}
-
-		if debug {
-			fmt.Println("send message...")
-		}
-
-		err = w.WriteMessages(context.Background(),
-			kafka.Message{
-				Value: monitorMessageBlob,
+		err = sender.SendMessageToKafka(
+			sender.KafkaTarget{
+				Brokers:      []string{target},
+				Topic:        topic,
+				WriteTimeout: 10 * time.Second,
 			},
-		)
+			monitorMessageBlob,
+			debug)
 
 		if err != nil {
 			f := os.Stderr
@@ -196,16 +179,6 @@ var sendCmd = &cobra.Command{
 			}
 			fmt.Fprintf(f, "send message failed: %s\n", err)
 			os.Exit(returnCode)
-		}
-
-		fmt.Printf("send message successful\n")
-
-		if debug {
-			fmt.Println("close writer...")
-		}
-		w.Close()
-		if debug {
-			fmt.Println("close writer...done")
 		}
 	},
 }
