@@ -13,19 +13,25 @@ type KafkaTarget struct {
 	WriteTimeout time.Duration
 }
 
-func SendMessageToKafka(kafkaTarget KafkaTarget, message []byte, debug bool) error {
-	if debug {
+type KafkaSender struct {
+	Target KafkaTarget
+	Debug  bool
+}
+
+func (s *KafkaSender) SendMessage(message []byte) error {
+
+	if s.Debug {
 		fmt.Println("create writer...")
 	}
 
 	w := kafka.NewWriter(kafka.WriterConfig{
-		Brokers:      kafkaTarget.Brokers,
-		Topic:        kafkaTarget.Topic,
+		Brokers:      s.Target.Brokers,
+		Topic:        s.Target.Topic,
 		Balancer:     &kafka.LeastBytes{},
-		WriteTimeout: kafkaTarget.WriteTimeout,
+		WriteTimeout: s.Target.WriteTimeout,
 	})
 
-	if debug {
+	if s.Debug {
 		fmt.Println("create writer...done")
 		fmt.Println("send message...")
 	}
@@ -42,11 +48,11 @@ func SendMessageToKafka(kafkaTarget KafkaTarget, message []byte, debug bool) err
 
 	fmt.Printf("send message successful\n")
 
-	if debug {
+	if s.Debug {
 		fmt.Println("close writer...")
 	}
 	w.Close()
-	if debug {
+	if s.Debug {
 		fmt.Println("close writer...done")
 	}
 

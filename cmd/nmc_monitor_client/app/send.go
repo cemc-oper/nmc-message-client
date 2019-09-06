@@ -161,14 +161,16 @@ var sendCmd = &cobra.Command{
 			return
 		}
 
-		err = sender.SendMessageToKafka(
-			sender.KafkaTarget{
+		s := &sender.KafkaSender{
+			Target: sender.KafkaTarget{
 				Brokers:      []string{target},
 				Topic:        topic,
 				WriteTimeout: 10 * time.Second,
 			},
-			monitorMessageBlob,
-			debug)
+			Debug: debug,
+		}
+
+		err = s.SendMessage(monitorMessageBlob)
 
 		if err != nil {
 			f := os.Stderr
