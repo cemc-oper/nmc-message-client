@@ -1,7 +1,6 @@
 package app
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/nwpc-oper/nmc-monitor-client-go/sender"
 	"github.com/spf13/cobra"
@@ -24,8 +23,6 @@ var (
 	datetime         int64
 	fileName         = ""
 	absoluteDataName = ""
-	startTime        = ""
-	forecastTime     = ""
 	debug            = false
 	disableSend      = false
 	ignoreError      = false
@@ -72,19 +69,6 @@ var sendCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		if messageType == "prod_grib" {
-			var prodGribFlagSet = pflag.NewFlagSet("prod_grid", pflag.ContinueOnError)
-			prodGribFlagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
-			prodGribFlagSet.SortFlags = false
-
-			prodGribFlagSet.StringVar(&startTime, "start-time", "", "start time, such as 2019062400")
-			prodGribFlagSet.StringVar(&forecastTime, "forecast-time", "", "forecast time, such as 000")
-			if err := prodGribFlagSet.Parse(args); err != nil {
-				cmd.Usage()
-				log.Fatal(err)
-			}
-		}
-
 		// check if there are non-flag arguments in the command line
 		cmds := sendFlagSet.Args()
 		if len(cmds) > 0 {
@@ -109,33 +93,7 @@ var sendCmd = &cobra.Command{
 			fmt.Printf("Build at %s\n", BuildTime)
 		}
 
-		description := MessageDescription{
-			StartTime:    startTime,
-			ForecastTime: forecastTime,
-		}
-		descriptionBlob, err := json.Marshal(description)
-		if err != nil {
-			f := os.Stderr
-			returnCode := 2
-			if ignoreError {
-				f = os.Stdout
-				returnCode = 0
-			}
-			fmt.Fprintf(f, "create description error: %s\n", err)
-			os.Exit(returnCode)
-		}
-
-		monitorMessage := MonitorMessage{
-			Source:           source,
-			MessageType:      messageType,
-			Status:           status,
-			DateTime:         datetime,
-			FileName:         fileName,
-			AbsoluteDataName: absoluteDataName,
-			Description:      string(descriptionBlob),
-		}
-
-		monitorMessageBlob, err := json.MarshalIndent(monitorMessage, "", "  ")
+		monitorMessageBlob, err := createProdGribMessage(args)
 
 		if err != nil {
 			f := os.Stderr
@@ -184,19 +142,4 @@ var sendCmd = &cobra.Command{
 			os.Exit(returnCode)
 		}
 	},
-}
-
-type MonitorMessage struct {
-	Source           string `json:"source"`
-	MessageType      string `json:"type"`
-	Status           string `json:"status"`
-	DateTime         int64  `json:"datetime,omitempty"`
-	FileName         string `json:"fileName"`
-	AbsoluteDataName string `json:"absoluteDataName,omitempty"`
-	Description      string `json:"desc,omitempty"`
-}
-
-type MessageDescription struct {
-	StartTime    string `json:"startTime,omitempty"`
-	ForecastTime string `json:"forecastTime,omitempty"`
 }
