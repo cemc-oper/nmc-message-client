@@ -161,7 +161,8 @@ var sendCmd = &cobra.Command{
 			return
 		}
 
-		s := &sender.KafkaSender{
+		var s sender.Sender
+		s = &sender.KafkaSender{
 			Target: sender.KafkaTarget{
 				Brokers:      []string{target},
 				Topic:        topic,
