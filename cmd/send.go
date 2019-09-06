@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/segmentio/kafka-go"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+	"log"
 	"os"
 	"time"
 )
@@ -28,38 +30,78 @@ var (
 	debug            = false
 	disableSend      = false
 	ignoreError      = false
+	help             = false
 )
 
 func init() {
 	rootCmd.AddCommand(sendCmd)
-
-	currentTimeStamp := makeTimestamp()
-
-	sendCmd.Flags().StringVar(&target, "target", "", "send target")
-	sendCmd.Flags().StringVar(&topic, "topic", "monitor", "message topic")
-	sendCmd.Flags().StringVar(&source, "source", "", "message source")
-	sendCmd.Flags().StringVar(&messageType, "type", "", "message type")
-	sendCmd.Flags().StringVar(&status, "status", "0", "status")
-	sendCmd.Flags().Int64Var(&datetime, "datetime", currentTimeStamp, "datetime, default is current time.")
-	sendCmd.Flags().StringVar(&fileName, "file-name", "", "file name")
-	sendCmd.Flags().StringVar(&absoluteDataName, "absolute-data-name", "", "absolute data name")
-	sendCmd.Flags().StringVar(&startTime, "start-time", "", "start time, such as 2019062400")
-	sendCmd.Flags().StringVar(&forecastTime, "forecast-time", "", "forecast time, such as 000")
-	sendCmd.Flags().BoolVar(&debug, "debug", false, "show debug information")
-	sendCmd.Flags().BoolVar(&disableSend, "disable-send", false, "disable message send.")
-	sendCmd.Flags().BoolVar(&ignoreError, "ignore-error", false,
-		"ignore error. Should be open in operation systems.")
 
 	sendCmd.MarkFlagRequired("target")
 	sendCmd.MarkFlagRequired("source")
 	sendCmd.MarkFlagRequired("type")
 }
 
+var sendFlagSet = pflag.NewFlagSet("send", pflag.ContinueOnError)
+
 var sendCmd = &cobra.Command{
-	Use:   "send",
-	Short: "Send message to NMC Monitor",
-	Long:  "Send message to NMC Monitor",
+	Use:                "send",
+	Short:              "Send message to NMC Monitor",
+	Long:               "Send message to NMC Monitor",
+	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
+		currentTimeStamp := makeTimestamp()
+		sendFlagSet.StringVar(&target, "target", "", "send target")
+		sendFlagSet.StringVar(&topic, "topic", "monitor", "message topic")
+		sendFlagSet.StringVar(&source, "source", "", "message source")
+		sendFlagSet.StringVar(&messageType, "type", "", "message type")
+		sendFlagSet.StringVar(&status, "status", "0", "status")
+		sendFlagSet.Int64Var(&datetime, "datetime", currentTimeStamp, "datetime, default is current time.")
+		sendFlagSet.StringVar(&fileName, "file-name", "", "file name")
+		sendFlagSet.StringVar(&absoluteDataName, "absolute-data-name", "", "absolute data name")
+		sendFlagSet.BoolVar(&debug, "debug", false, "show debug information")
+		sendFlagSet.BoolVar(&disableSend, "disable-send", false, "disable message send.")
+		sendFlagSet.BoolVar(&ignoreError, "ignore-error", false,
+			"ignore error. Should be open in operation systems.")
+		sendFlagSet.BoolVar(&help, "help", false,
+			"show help information.")
+		sendFlagSet.SortFlags = false
+
+		sendFlagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
+		if err := sendFlagSet.Parse(args); err != nil {
+			cmd.Usage()
+			log.Fatal(err)
+		}
+
+		if messageType == "prod_grib" {
+			sendFlagSet.StringVar(&startTime, "start-time", "", "start time, such as 2019062400")
+			sendFlagSet.StringVar(&forecastTime, "forecast-time", "", "forecast time, such as 000")
+		}
+
+		if err := sendFlagSet.Parse(args); err != nil {
+			cmd.Usage()
+			log.Fatal(err)
+		}
+
+		// check if there are non-flag arguments in the command line
+		cmds := sendFlagSet.Args()
+		if len(cmds) > 0 {
+			cmd.Usage()
+			log.Fatalf("unknown command: %s", cmds[0])
+		}
+
+		// short-circuit on help
+		help, err := sendFlagSet.GetBool("help")
+		if err != nil {
+			log.Fatal(`"help" flag is non-bool, programmer error, please correct`)
+		}
+		if help {
+			cmd.Help()
+			fmt.Printf("%s\n", sendFlagSet.FlagUsages())
+			return
+		}
+
+		debug, err := sendFlagSet.GetBool("debug")
+
 		if debug {
 			fmt.Printf("Version %s (%s)\n", Version, GitCommit)
 			fmt.Printf("Build at %s\n", BuildTime)
