@@ -41,8 +41,6 @@ func init() {
 	sendCmd.MarkFlagRequired("type")
 }
 
-var sendFlagSet = pflag.NewFlagSet("send", pflag.ContinueOnError)
-
 var sendCmd = &cobra.Command{
 	Use:                "send",
 	Short:              "Send message to NMC Monitor",
@@ -50,6 +48,11 @@ var sendCmd = &cobra.Command{
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		currentTimeStamp := makeTimestamp()
+
+		var sendFlagSet = pflag.NewFlagSet("send", pflag.ContinueOnError)
+		sendFlagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
+		sendFlagSet.SortFlags = false
+
 		sendFlagSet.StringVar(&target, "target", "", "send target")
 		sendFlagSet.StringVar(&topic, "topic", "monitor", "message topic")
 		sendFlagSet.StringVar(&source, "source", "", "message source")
@@ -64,22 +67,23 @@ var sendCmd = &cobra.Command{
 			"ignore error. Should be open in operation systems.")
 		sendFlagSet.BoolVar(&help, "help", false,
 			"show help information.")
-		sendFlagSet.SortFlags = false
 
-		sendFlagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
 		if err := sendFlagSet.Parse(args); err != nil {
 			cmd.Usage()
 			log.Fatal(err)
 		}
 
 		if messageType == "prod_grib" {
-			sendFlagSet.StringVar(&startTime, "start-time", "", "start time, such as 2019062400")
-			sendFlagSet.StringVar(&forecastTime, "forecast-time", "", "forecast time, such as 000")
-		}
+			var prodGribFlagSet = pflag.NewFlagSet("prod_grid", pflag.ContinueOnError)
+			prodGribFlagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
+			prodGribFlagSet.SortFlags = false
 
-		if err := sendFlagSet.Parse(args); err != nil {
-			cmd.Usage()
-			log.Fatal(err)
+			prodGribFlagSet.StringVar(&startTime, "start-time", "", "start time, such as 2019062400")
+			prodGribFlagSet.StringVar(&forecastTime, "forecast-time", "", "forecast time, such as 000")
+			if err := prodGribFlagSet.Parse(args); err != nil {
+				cmd.Usage()
+				log.Fatal(err)
+			}
 		}
 
 		// check if there are non-flag arguments in the command line
@@ -94,13 +98,12 @@ var sendCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(`"help" flag is non-bool, programmer error, please correct`)
 		}
+
 		if help {
 			cmd.Help()
 			fmt.Printf("%s\n", sendFlagSet.FlagUsages())
 			return
 		}
-
-		debug, err := sendFlagSet.GetBool("debug")
 
 		if debug {
 			fmt.Printf("Version %s (%s)\n", Version, GitCommit)
