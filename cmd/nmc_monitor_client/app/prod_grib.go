@@ -9,6 +9,7 @@ import (
 func createProdGribMessage(args []string) ([]byte, error) {
 	var startTime = ""
 	var forecastTime = ""
+
 	var prodGribFlagSet = pflag.NewFlagSet("prod_grid", pflag.ContinueOnError)
 	prodGribFlagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
 	prodGribFlagSet.SortFlags = false
@@ -25,7 +26,7 @@ func createProdGribMessage(args []string) ([]byte, error) {
 	}
 	descriptionBlob, err := json.Marshal(description)
 	if err != nil {
-		return nil, fmt.Errorf("create description error: %s", err)
+		return nil, fmt.Errorf("create description for prod-grib error: %s", err)
 	}
 
 	monitorMessage := MonitorMessage{
@@ -41,7 +42,7 @@ func createProdGribMessage(args []string) ([]byte, error) {
 	monitorMessageBlob, err := json.MarshalIndent(monitorMessage, "", "  ")
 
 	if err != nil {
-		return monitorMessageBlob, fmt.Errorf("create message error: %s", err)
+		return monitorMessageBlob, fmt.Errorf("create message for prod-grib error: %s", err)
 	}
 
 	return monitorMessageBlob, nil

@@ -31,10 +31,6 @@ var (
 
 func init() {
 	rootCmd.AddCommand(sendCmd)
-
-	sendCmd.MarkFlagRequired("target")
-	sendCmd.MarkFlagRequired("source")
-	sendCmd.MarkFlagRequired("type")
 }
 
 var sendCmd = &cobra.Command{
@@ -86,6 +82,17 @@ var sendCmd = &cobra.Command{
 			cmd.Help()
 			fmt.Printf("%s\n", sendFlagSet.FlagUsages())
 			return
+		}
+
+		// check required flags
+		if target == "" {
+			log.Fatal("target option is required")
+		}
+		if source == "" {
+			log.Fatal("source option is required")
+		}
+		if messageType == "" {
+			log.Fatal("messageType option is required")
 		}
 
 		if debug {
