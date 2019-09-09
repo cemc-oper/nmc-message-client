@@ -2,7 +2,7 @@ package app
 
 import (
 	"fmt"
-	"github.com/nwpc-oper/nmc-monitor-client-go/sender"
+	"github.com/nwpc-oper/nwpc-message-client/sender"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"log"

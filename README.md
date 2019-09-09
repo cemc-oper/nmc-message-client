@@ -1,6 +1,6 @@
-# nmc-monitor-client-go
+# nwpc-monitor-client
 
-A Go client for NMC Monitor Platform.
+A message client for NWPC operation systems.
 
 ## Installing
 
@@ -8,13 +8,15 @@ Download the latest release and build source code.
 
 Use `Makefile` to build source code on Linux.
 
-`nmc_monitor_client` command will be installed in `bin` directory.
+All tools will be installed in `bin` directory.
 
 ## Getting started
 
-### send
+Use different tools to send messages to different message system.
 
-Send message to NMC Monitor Platform using `send` command.
+### nmc_monitor_client
+
+Send message to NMC Monitor Platform using `nmc_monitor_client send` command.
 
 ```bash
 nmc_monitor_client send \
@@ -48,4 +50,4 @@ with default topic monitor.
 
 Copyright &copy; 2019, Perilla Roc at nwpc-oper.
 
-`nmc-monitor-client-go` is licensed under [MIT License](LICENSE)
+`nwpc-message-client` is licensed under [MIT License](LICENSE)
