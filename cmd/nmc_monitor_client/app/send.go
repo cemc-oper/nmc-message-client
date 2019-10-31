@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/pflag"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -45,7 +46,7 @@ var sendCmd = &cobra.Command{
 		sendFlagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
 		sendFlagSet.SortFlags = false
 
-		sendFlagSet.StringVar(&target, "target", "", "send target")
+		sendFlagSet.StringVar(&target, "target", "", "send targets, split by ','")
 		sendFlagSet.StringVar(&topic, "topic", "monitor", "message topic")
 		sendFlagSet.StringVar(&source, "source", "", "message source")
 		sendFlagSet.StringVar(&messageType, "type", "", "message type")
@@ -88,6 +89,9 @@ var sendCmd = &cobra.Command{
 		if target == "" {
 			log.Fatal("target option is required")
 		}
+		targetBrokers := strings.Split(target, ",")
+		fmt.Printf("brokers: %s\n", targetBrokers)
+
 		if source == "" {
 			log.Fatal("source option is required")
 		}
@@ -129,7 +133,7 @@ var sendCmd = &cobra.Command{
 		var s sender.Sender
 		s = &sender.KafkaSender{
 			Target: sender.KafkaTarget{
-				Brokers:      []string{target},
+				Brokers:      targetBrokers,
 				Topic:        topic,
 				WriteTimeout: 10 * time.Second,
 			},
