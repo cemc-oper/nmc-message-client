@@ -1,4 +1,4 @@
-module github.com/nwpc-oper/nwpc-message-client
+module github.com/nwpc-oper/nmc-message-client
 
 go 1.12
 

@@ -1,4 +1,4 @@
-# nwpc-monitor-client
+# nmc-message-client
 
 A message client for NWPC operation systems.
 
@@ -50,4 +50,4 @@ with default topic monitor.
 
 Copyright &copy; 2019, Perilla Roc at nwpc-oper.
 
-`nwpc-message-client` is licensed under [MIT License](LICENSE)
+`nmc-message-client` is licensed under [MIT License](LICENSE)
