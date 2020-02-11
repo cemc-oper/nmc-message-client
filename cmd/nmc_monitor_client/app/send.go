@@ -2,7 +2,7 @@ package app
 
 import (
 	"fmt"
-	"github.com/nwpc-oper/nmc-message-client"
+	nmc_message_client "github.com/nwpc-oper/nmc-message-client"
 	"github.com/nwpc-oper/nmc-message-client/sender"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -49,16 +49,19 @@ var sendCmd = &cobra.Command{
 
 		sendFlagSet.StringVar(&target, "target", "", "send targets, split by ','")
 		sendFlagSet.StringVar(&topic, "topic", "monitor", "message topic")
+
 		sendFlagSet.StringVar(&source, "source", "", "message source")
 		sendFlagSet.StringVar(&messageType, "type", "", "message type")
 		sendFlagSet.StringVar(&status, "status", "0", "status")
 		sendFlagSet.Int64Var(&datetime, "datetime", currentTimeStamp, "datetime, default is current time.")
 		sendFlagSet.StringVar(&fileName, "file-name", "", "file name")
 		sendFlagSet.StringVar(&absoluteDataName, "absolute-data-name", "", "absolute data name")
+
 		sendFlagSet.BoolVar(&debug, "debug", false, "show debug information")
 		sendFlagSet.BoolVar(&disableSend, "disable-send", false, "disable message send.")
 		sendFlagSet.BoolVar(&ignoreError, "ignore-error", false,
 			"ignore error. Should be open in operation systems.")
+
 		sendFlagSet.BoolVar(&help, "help", false,
 			"show help information.")
 
@@ -105,28 +108,13 @@ var sendCmd = &cobra.Command{
 			fmt.Printf("Build at %s\n", BuildTime)
 		}
 
-		var startTime = ""
-		var forecastTime = ""
+		var monitorMessageBlob []byte
 
-		var prodGribFlagSet = pflag.NewFlagSet("prod_grid", pflag.ContinueOnError)
-		prodGribFlagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
-		prodGribFlagSet.SortFlags = false
-
-		prodGribFlagSet.StringVar(&startTime, "start-time", "", "start time, such as 2019062400")
-		prodGribFlagSet.StringVar(&forecastTime, "forecast-time", "", "forecast time, such as 000")
-		if err := prodGribFlagSet.Parse(args); err != nil {
-			log.Fatalf("argument parse fail: %s", err)
+		if messageType == "prod_grib" {
+			monitorMessageBlob, err = generateProdGribMessage(args)
+		} else {
+			log.Fatalf("message type is not supported: %s", messageType)
 		}
-
-		monitorMessageBlob, err := nmc_message_client.CreateProdGribMessage(
-			source,
-			messageType,
-			status,
-			datetime,
-			fileName,
-			absoluteDataName,
-			startTime,
-			forecastTime)
 
 		if err != nil {
 			f := os.Stderr
@@ -175,4 +163,31 @@ var sendCmd = &cobra.Command{
 			os.Exit(returnCode)
 		}
 	},
+}
+
+func generateProdGribMessage(args []string) ([]byte, error) {
+	var startTime = ""
+	var forecastTime = ""
+
+	var prodGribFlagSet = pflag.NewFlagSet("prod_grid", pflag.ContinueOnError)
+	prodGribFlagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
+	prodGribFlagSet.SortFlags = false
+
+	prodGribFlagSet.StringVar(&startTime, "start-time", "", "start time, such as 2019062400")
+	prodGribFlagSet.StringVar(&forecastTime, "forecast-time", "", "forecast time, such as 000")
+	if err := prodGribFlagSet.Parse(args); err != nil {
+		log.Fatalf("argument parse fail: %s", err)
+	}
+
+	monitorMessageBlob, err := nmc_message_client.CreateProdGribMessage(
+		source,
+		messageType,
+		status,
+		datetime,
+		fileName,
+		absoluteDataName,
+		startTime,
+		forecastTime)
+
+	return monitorMessageBlob, err
 }
