@@ -18,7 +18,7 @@ Use different tools to send messages to different message system.
 
 Send message to NMC Monitor Platform using `nmc_monitor_client send` command.
 
-```bash
+```shell script
 nmc_monitor_client send \
 	--target 10.20.90.35:9092 \
 	--source nwpc_grapes_gfs \
@@ -37,7 +37,7 @@ with default topic monitor.
 ```json
 {
 	"source":"nwpc_grapes_gfs",
-	"type":"prod_grib2",
+	"type":"prod_grib",
 	"status":"0",
 	"datetime":1561363080430,
 	"fileName":"gmf.gra.2019062400006.grb2",
@@ -48,6 +48,6 @@ with default topic monitor.
 
 ## License
 
-Copyright &copy; 2019, Perilla Roc at nwpc-oper.
+Copyright &copy; 2019-2020, Perilla Roc at nwpc-oper.
 
 `nmc-message-client` is licensed under [MIT License](LICENSE)

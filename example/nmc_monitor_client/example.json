@@ -1,6 +1,6 @@
 {
   "source": "nwpc_grapes_gfs",
-  "type": "prod_grib2",
+  "type": "prod_grib",
   "status": "0",
   "datetime": 1561363080430,
   "fileName": "gmf.gra.2019062400006.grb2",
