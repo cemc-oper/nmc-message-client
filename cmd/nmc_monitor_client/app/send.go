@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/nwpc-oper/nmc-message-client"
 	"github.com/nwpc-oper/nmc-message-client/sender"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -104,7 +105,28 @@ var sendCmd = &cobra.Command{
 			fmt.Printf("Build at %s\n", BuildTime)
 		}
 
-		monitorMessageBlob, err := createProdGribMessage(args)
+		var startTime = ""
+		var forecastTime = ""
+
+		var prodGribFlagSet = pflag.NewFlagSet("prod_grid", pflag.ContinueOnError)
+		prodGribFlagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
+		prodGribFlagSet.SortFlags = false
+
+		prodGribFlagSet.StringVar(&startTime, "start-time", "", "start time, such as 2019062400")
+		prodGribFlagSet.StringVar(&forecastTime, "forecast-time", "", "forecast time, such as 000")
+		if err := prodGribFlagSet.Parse(args); err != nil {
+			log.Fatalf("argument parse fail: %s", err)
+		}
+
+		monitorMessageBlob, err := nmc_message_client.CreateProdGribMessage(
+			source,
+			messageType,
+			status,
+			datetime,
+			fileName,
+			absoluteDataName,
+			startTime,
+			forecastTime)
 
 		if err != nil {
 			f := os.Stderr

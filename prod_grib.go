@@ -1,24 +1,19 @@
-package app
+package nmc_message_client
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/spf13/pflag"
 )
 
-func createProdGribMessage(args []string) ([]byte, error) {
-	var startTime = ""
-	var forecastTime = ""
-
-	var prodGribFlagSet = pflag.NewFlagSet("prod_grid", pflag.ContinueOnError)
-	prodGribFlagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
-	prodGribFlagSet.SortFlags = false
-
-	prodGribFlagSet.StringVar(&startTime, "start-time", "", "start time, such as 2019062400")
-	prodGribFlagSet.StringVar(&forecastTime, "forecast-time", "", "forecast time, such as 000")
-	if err := prodGribFlagSet.Parse(args); err != nil {
-		return nil, fmt.Errorf("argument parse fail: %s", err)
-	}
+func CreateProdGribMessage(
+	source string,
+	messageType string,
+	status string,
+	datetime int64,
+	fileName string,
+	absoluteDataName string,
+	startTime string,
+	forecastTime string) ([]byte, error) {
 
 	description := ProbGribMessageDescription{
 		StartTime:    startTime,

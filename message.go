@@ -1,4 +1,4 @@
-package app
+package nmc_message_client
 
 type MonitorMessage struct {
 	Source           string `json:"source"`
