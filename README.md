@@ -20,7 +20,7 @@ Send message to NMC Monitor Platform using `nmc_monitor_client send` command.
 
 ```shell script
 nmc_monitor_client send \
-	--target 10.20.90.35:9092 \
+	--target 10.20.67.183:9092,10.20.67.216:9092,10.20.67.217:9092 \
 	--source nwpc_grapes_gfs \
 	--type prod_grib \
 	--status 0 \
