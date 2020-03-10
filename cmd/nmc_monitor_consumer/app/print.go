@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"strings"
+	"time"
 )
 
 var (
@@ -98,9 +99,28 @@ var printCommand = &cobra.Command{
 				log.Warnf("can't parse message: %v", err)
 			}
 			source := message.Source
-			if len(source) >= 5 && source[:5] == "nwpc_" {
-				fmt.Printf("message at offset %d: %s = %s\n", m.Offset, string(m.Key), string(m.Value))
+			if len(source) < 5 || source[:5] != "nwpc_" {
+				continue
 			}
+
+			if message.MessageType != "prod_grib" {
+				continue
+			}
+
+			var des nmc_message_client.ProbGribMessageDescription
+			err = json.Unmarshal([]byte(message.Description), &des)
+			if err != nil {
+				log.Warnf("can't parse description: %v", err)
+			}
+
+			dateTime := time.Unix(message.DateTime/1000, 0)
+
+			fmt.Printf("[%d][%s][%s][prod_grib] %s +%s \n",
+				m.Offset,
+				dateTime.Format("2006-01-02 15:04:05"),
+				message.Source,
+				des.StartTime,
+				des.ForecastTime)
 		}
 
 		r.Close()
