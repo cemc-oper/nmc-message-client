@@ -2,19 +2,22 @@ package app
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	nmc_message_client "github.com/nwpc-oper/nmc-message-client"
 	"github.com/segmentio/kafka-go"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"log"
 	"strings"
 )
 
 var (
-	server = ""
-	topic  = ""
-	debug  = false
-	help   = false
+	server       = ""
+	topic        = ""
+	offset int64 = 0
+	debug        = false
+	help         = false
 )
 
 func init() {
@@ -33,6 +36,7 @@ var printCommand = &cobra.Command{
 
 		printFlagSet.StringVar(&server, "server", "", "kafka servers, split by ','")
 		printFlagSet.StringVar(&topic, "topic", "monitor", "message topic")
+		printFlagSet.Int64Var(&offset, "offset", 0, "message offset")
 
 		printFlagSet.BoolVar(&debug, "debug", false, "show debug information")
 
@@ -81,13 +85,22 @@ var printCommand = &cobra.Command{
 			MinBytes:  10e3, // 10KB
 			MaxBytes:  10e6, // 10MB
 		})
+		r.SetOffset(0)
 
 		for {
 			m, err := r.ReadMessage(context.Background())
 			if err != nil {
 				break
 			}
-			fmt.Printf("message at offset %d: %s = %s\n", m.Offset, string(m.Key), string(m.Value))
+			var message nmc_message_client.MonitorMessage
+			err = json.Unmarshal(m.Value, &message)
+			if err != nil {
+				log.Warnf("can't parse message: %v", err)
+			}
+			source := message.Source
+			if len(source) >= 5 && source[:5] == "nwpc_" {
+				fmt.Printf("message at offset %d: %s = %s\n", m.Offset, string(m.Key), string(m.Value))
+			}
 		}
 
 		r.Close()

@@ -24,7 +24,7 @@ require (
 	github.com/russross/blackfriday v2.0.0+incompatible // indirect
 	github.com/schollz/progressbar/v2 v2.13.2 // indirect
 	github.com/segmentio/kafka-go v0.2.4
-	github.com/sirupsen/logrus v1.4.2 // indirect
+	github.com/sirupsen/logrus v1.4.2
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cobra v0.0.4
@@ -42,7 +42,7 @@ require (
 	golang.org/x/mod v0.1.0 // indirect
 	golang.org/x/net v0.0.0-20190603091049-60506f45cf65 // indirect
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45 // indirect
-	golang.org/x/sys v0.0.0-20190602015325-4c4f7f33c9ed // indirect
+	golang.org/x/sys v0.0.0-20200302150141-5c8b2ff67527 // indirect
 	golang.org/x/tools v0.0.0-20190606050223-4d9ae51c2468 // indirect
 	google.golang.org/appengine v1.6.0 // indirect
 	google.golang.org/genproto v0.0.0-20190605220351-eb0b1bdb6ae6 // indirect
