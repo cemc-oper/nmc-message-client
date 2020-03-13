@@ -1,16 +1,12 @@
 package app
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
-	nmc_message_client "github.com/nwpc-oper/nmc-message-client"
-	"github.com/segmentio/kafka-go"
+	consumer "github.com/nwpc-oper/nmc-message-client/consumer"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"strings"
-	"time"
 )
 
 var (
@@ -79,50 +75,16 @@ var printCommand = &cobra.Command{
 		}
 
 		// main
-		r := kafka.NewReader(kafka.ReaderConfig{
-			Brokers:   serverList,
-			Topic:     topic,
-			Partition: 0,
-			MinBytes:  10e3, // 10KB
-			MaxBytes:  10e6, // 10MB
-		})
-		r.SetOffset(0)
-
-		for {
-			m, err := r.ReadMessage(context.Background())
-			if err != nil {
-				break
-			}
-			var message nmc_message_client.MonitorMessage
-			err = json.Unmarshal(m.Value, &message)
-			if err != nil {
-				log.Warnf("can't parse message: %v", err)
-			}
-			source := message.Source
-			if len(source) < 5 || source[:5] != "nwpc_" {
-				continue
-			}
-
-			if message.MessageType != "prod_grib" {
-				continue
-			}
-
-			var des nmc_message_client.ProbGribMessageDescription
-			err = json.Unmarshal([]byte(message.Description), &des)
-			if err != nil {
-				log.Warnf("can't parse description: %v", err)
-			}
-
-			dateTime := time.Unix(message.DateTime/1000, 0)
-
-			fmt.Printf("[%d][%s][%s][prod_grib] %s +%s \n",
-				m.Offset,
-				dateTime.Format("2006-01-02 15:04:05"),
-				message.Source,
-				des.StartTime,
-				des.ForecastTime)
+		c := consumer.PrinterConsumer{
+			Source: consumer.KafkaSource{
+				Brokers: serverList,
+				Topic:   topic,
+				Offset:  offset,
+			},
+			WorkerCount:  0,
+			ConsumerName: "printer",
+			Debug:        false,
 		}
-
-		r.Close()
+		c.ConsumeMessages()
 	},
 }
