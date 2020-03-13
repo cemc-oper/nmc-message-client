@@ -123,16 +123,16 @@ func (s *ProductionConsumer) consumeProdGribMessageToElastic(
 				Message: message,
 			})
 
-			log.WithFields(log.Fields{
-				"component": "elastic",
-				"event":     "message",
-			}).Infof("[%s][%s][%s][prod_grib] %s +%s",
-				message.Offset,
-				message.DateTime.Format("2006-01-02 15:04:05"),
-				message.Source,
-				message.StartTime.Format("2006010215"),
-				message.ForecastTime,
-			)
+			//log.WithFields(log.Fields{
+			//	"component": "elastic",
+			//	"event":     "message",
+			//}).Infof("[%s][%s][%s][prod_grib] %s +%s",
+			//	message.Offset,
+			//	message.DateTime.Format("2006-01-02 15:04:05"),
+			//	message.Source,
+			//	message.StartTime.Format("2006010215"),
+			//	message.ForecastTime,
+			//)
 
 			if len(received) > s.BulkSize {
 				// send to elasticsearch
