@@ -3,6 +3,7 @@ package nmc_message_client
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 func CreateProdGribMessage(
@@ -46,4 +47,15 @@ func CreateProdGribMessage(
 type ProbGribMessageDescription struct {
 	StartTime    string `json:"startTime,omitempty"`
 	ForecastTime string `json:"forecastTime,omitempty"`
+}
+
+type GribProduction struct {
+	Offset       string    `json:"_id"`
+	Source       string    `json:"source"`
+	MessageType  string    `json:"type"`
+	Status       string    `json:"status"`
+	DateTime     time.Time `json:"datetime,omitempty"`
+	FileName     string    `json:"fileName"`
+	StartTime    string    `json:"startTime,omitempty"`
+	ForecastTime string    `json:"forecastTime,omitempty"`
 }
