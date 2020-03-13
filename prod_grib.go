@@ -56,6 +56,6 @@ type GribProduction struct {
 	Status       string    `json:"status"`
 	DateTime     time.Time `json:"datetime,omitempty"`
 	FileName     string    `json:"fileName"`
-	StartTime    string    `json:"startTime,omitempty"`
+	StartTime    time.Time `json:"startTime,omitempty"`
 	ForecastTime string    `json:"forecastTime,omitempty"`
 }
