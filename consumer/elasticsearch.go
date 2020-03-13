@@ -13,6 +13,7 @@ type ElasticSearchTarget struct {
 
 type messageWithIndex struct {
 	Index   string
+	Id      string
 	Message nmc_message_client.GribProduction
 }
 
@@ -21,6 +22,7 @@ func pushMessages(client *elastic.Client, messages []messageWithIndex, ctx conte
 	for _, indexMessage := range messages {
 		request := elastic.NewBulkIndexRequest().
 			Index(indexMessage.Index).
+			Id(indexMessage.Id).
 			Doc(indexMessage.Message)
 		bulkRequest.Add(request)
 	}

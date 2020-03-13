@@ -50,7 +50,7 @@ type ProbGribMessageDescription struct {
 }
 
 type GribProduction struct {
-	Offset       string    `json:"_id"`
+	Offset       string    `json:"-"`
 	Source       string    `json:"source"`
 	MessageType  string    `json:"type"`
 	Status       string    `json:"status"`

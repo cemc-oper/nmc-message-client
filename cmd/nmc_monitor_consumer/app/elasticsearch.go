@@ -34,7 +34,7 @@ var elasticSearchCommand = &cobra.Command{
 
 		printFlagSet.StringVar(&elasticServer,
 			"elasticsearch-server", "", "elasticsearch server")
-		printFlagSet.IntVar(&bulkSize, "bulk-size", 20, "bulk size")
+		printFlagSet.IntVar(&bulkSize, "bulk-size", 200, "bulk size")
 
 		printFlagSet.BoolVar(&debug, "debug", false, "show debug information")
 

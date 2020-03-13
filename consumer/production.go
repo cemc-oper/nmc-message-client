@@ -55,6 +55,18 @@ func (s *ProductionConsumer) ConsumeMessages() error {
 		"event":     "consume",
 	}).Info("start to consume...")
 
+	messageChannel := make(chan nmc_message_client.GribProduction, 10)
+	done := make(chan bool)
+
+	go s.readFromKafka(messageChannel, done)
+	go s.consumeProdGribMessageToElastic(client, ctx, messageChannel, done)
+
+	select {}
+
+	return nil
+}
+
+func (s *ProductionConsumer) readFromKafka(messageChannel chan nmc_message_client.GribProduction, done chan bool) {
 	for {
 		m, err := s.Source.Reader.ReadMessage(context.Background())
 		if err != nil {
@@ -78,20 +90,95 @@ func (s *ProductionConsumer) ConsumeMessages() error {
 				"component": "production",
 				"event":     "consume",
 			}).Warnf("can't generate GribProduction: %v", err)
-			return err
+			continue
 		}
 
-		index := getIndexForProductionMessage(gribProduction)
-
-		printProdGribMessage(message, m)
-
-		pushMessages(client, []messageWithIndex{{
-			Index:   index,
-			Message: gribProduction,
-		}}, ctx)
+		messageChannel <- gribProduction
 	}
+	done <- true
+}
 
-	return nil
+func (s *ProductionConsumer) consumeProdGribMessageToElastic(
+	client *elastic.Client,
+	ctx context.Context,
+	messageChannel chan nmc_message_client.GribProduction,
+	done chan bool,
+) {
+	// consume messages from rabbitmq
+	log.WithFields(log.Fields{
+		"component": "production",
+		"event":     "consume",
+	}).Info("start to consume...")
+
+	var received []messageWithIndex
+	isDone := false
+	for {
+		select {
+		case message := <-messageChannel:
+			// parse message to generate message index
+			log.WithFields(log.Fields{
+				"component": "elastic",
+				"event":     "message",
+			}).Infof("received message...")
+
+			index := getIndexForProductionMessage(message)
+			received = append(received, messageWithIndex{
+				Index:   index,
+				Id:      message.Offset,
+				Message: message,
+			})
+			log.WithFields(log.Fields{
+				"component": "elastic",
+				"event":     "message",
+			}).Infof("receive message...parsed")
+
+			if len(received) > s.BulkSize {
+				// send to elasticsearch
+				log.WithFields(log.Fields{
+					"component": "elastic",
+					"event":     "push",
+				}).Info("bulk size push...")
+				pushMessages(client, received, ctx)
+				log.WithFields(log.Fields{
+					"component": "elastic",
+					"event":     "push",
+				}).Info("bulk size push...done")
+				received = nil
+			}
+		case <-time.After(time.Second * 1):
+			if len(received) > 0 {
+				// send to elasticsearch
+				log.WithFields(log.Fields{
+					"component": "elastic",
+					"event":     "push",
+				}).Info("time limit push...")
+				pushMessages(client, received, ctx)
+				log.WithFields(log.Fields{
+					"component": "elastic",
+					"event":     "push",
+				}).Info("time limit push...done")
+				received = nil
+			}
+		case <-done:
+			if len(received) > 0 {
+				// send to elasticsearch
+				log.WithFields(log.Fields{
+					"component": "elastic",
+					"event":     "push",
+				}).Info("done push...")
+				pushMessages(client, received, ctx)
+				log.WithFields(log.Fields{
+					"component": "elastic",
+					"event":     "push",
+				}).Info("done push...done")
+				received = nil
+			}
+			isDone = true
+		}
+		if isDone {
+			break
+		}
+	}
 }
 
 func isProductionGribMessage(message nmc_message_client.MonitorMessage) bool {
