@@ -30,7 +30,7 @@ func pushMessages(client *elastic.Client, messages []messageWithIndex, ctx conte
 	if err != nil {
 		log.WithFields(log.Fields{
 			"component": "elastic",
-			"event":     "index",
+			"event":     "push",
 		}).Errorf("%v", err)
 		return
 	}

@@ -116,21 +116,23 @@ func (s *ProductionConsumer) consumeProdGribMessageToElastic(
 		select {
 		case message := <-messageChannel:
 			// parse message to generate message index
-			log.WithFields(log.Fields{
-				"component": "elastic",
-				"event":     "message",
-			}).Infof("received message...")
-
 			index := getIndexForProductionMessage(message)
 			received = append(received, messageWithIndex{
 				Index:   index,
 				Id:      message.Offset,
 				Message: message,
 			})
+
 			log.WithFields(log.Fields{
 				"component": "elastic",
 				"event":     "message",
-			}).Infof("receive message...parsed")
+			}).Infof("[%s][%s][%s][prod_grib] %s +%s",
+				message.Offset,
+				message.DateTime.Format("2006-01-02 15:04:05"),
+				message.Source,
+				message.StartTime.Format("2006010215"),
+				message.ForecastTime,
+			)
 
 			if len(received) > s.BulkSize {
 				// send to elasticsearch
