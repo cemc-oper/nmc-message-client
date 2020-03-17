@@ -2,6 +2,7 @@ package consumer
 
 import (
 	"context"
+	"fmt"
 	nmc_message_client "github.com/nwpc-oper/nmc-message-client"
 	"github.com/olivere/elastic/v7"
 	log "github.com/sirupsen/logrus"
@@ -17,7 +18,7 @@ type messageWithIndex struct {
 	Message nmc_message_client.GribProduction
 }
 
-func pushMessages(client *elastic.Client, messages []messageWithIndex, ctx context.Context) {
+func pushMessages(client *elastic.Client, messages []messageWithIndex, ctx context.Context) error {
 	bulkRequest := client.Bulk()
 	for _, indexMessage := range messages {
 		request := elastic.NewBulkIndexRequest().
@@ -32,6 +33,7 @@ func pushMessages(client *elastic.Client, messages []messageWithIndex, ctx conte
 			"component": "elastic",
 			"event":     "push",
 		}).Errorf("%v", err)
-		return
+		return fmt.Errorf("push has error: %v", err)
 	}
+	return nil
 }
