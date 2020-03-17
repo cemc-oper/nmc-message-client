@@ -150,7 +150,7 @@ func (s *ProductionConsumer) consumeProdGribMessageToElastic(
 					log.WithFields(log.Fields{
 						"component": "elastic",
 						"event":     "push",
-					}).Info("bulk size push...done")
+					}).Infof("bulk size push...done, %d", len(received))
 					received = nil
 				}
 			}
@@ -171,7 +171,7 @@ func (s *ProductionConsumer) consumeProdGribMessageToElastic(
 					log.WithFields(log.Fields{
 						"component": "elastic",
 						"event":     "push",
-					}).Info("time limit push...done")
+					}).Infof("time limit push...done, %d", len(received))
 					received = nil
 				}
 			}
@@ -192,7 +192,7 @@ func (s *ProductionConsumer) consumeProdGribMessageToElastic(
 					log.WithFields(log.Fields{
 						"component": "elastic",
 						"event":     "push",
-					}).Info("done push...done")
+					}).Infof("done push...done, %d", len(received))
 					received = nil
 				}
 			}
