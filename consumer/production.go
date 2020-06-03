@@ -21,7 +21,6 @@ type ProductionConsumer struct {
 }
 
 func (s *ProductionConsumer) ConsumeMessages() error {
-	// create connection to rabbitmq
 	err := s.Source.CreateConnection()
 	if err != nil {
 		if s.Source.Reader != nil {
@@ -104,7 +103,6 @@ func (s *ProductionConsumer) consumeProdGribMessageToElastic(
 	messageChannel chan nmc_message_client.GribProduction,
 	done chan bool,
 ) {
-	// consume messages from rabbitmq
 	log.WithFields(log.Fields{
 		"component": "production",
 		"event":     "consume",
