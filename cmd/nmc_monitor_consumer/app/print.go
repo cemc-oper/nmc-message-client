@@ -10,11 +10,12 @@ import (
 )
 
 var (
-	server       = ""
-	topic        = ""
-	offset int64 = 0
-	debug        = false
-	help         = false
+	server        = ""
+	topic         = ""
+	offset  int64 = 0
+	groupId       = ""
+	debug         = false
+	help          = false
 )
 
 func init() {

@@ -31,6 +31,7 @@ var elasticSearchCommand = &cobra.Command{
 		printFlagSet.StringVar(&server, "kafka-server", "", "kafka servers, split by ','")
 		printFlagSet.StringVar(&topic, "kafka-topic", "monitor", "message topic")
 		printFlagSet.Int64Var(&offset, "kafka-offset", 0, "message offset")
+		printFlagSet.StringVar(&groupId, "kafka-group-id", "", "group id")
 
 		printFlagSet.StringVar(&elasticServer,
 			"elasticsearch-server", "", "elasticsearch server")
@@ -75,12 +76,17 @@ var elasticSearchCommand = &cobra.Command{
 			log.Fatal("source option is required")
 		}
 
+		if groupId == "" {
+			log.Fatal("groupId option is required")
+		}
+
 		// main
 		c := consumer.ProductionConsumer{
 			Source: consumer.KafkaSource{
 				Brokers: serverList,
 				Topic:   topic,
 				Offset:  offset,
+				GroupId: groupId,
 			},
 			Target: consumer.ElasticSearchTarget{
 				Server: elasticServer,
