@@ -88,7 +88,8 @@ func CreateProdGribMessageV2(
 
 	monitorMessage.ID = fmt.Sprintf("%x", md5.Sum([]byte(dateTime)))
 	monitorMessage.PID = fmt.Sprintf(
-		"GRAPES_PROD_GRIB+%s+%s+0000",
+		"%s+%s+%s+0000",
+		messageType,
 		startTime,
 		forecastTime,
 	)

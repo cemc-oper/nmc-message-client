@@ -29,7 +29,8 @@ var productionCmd = &cobra.Command{
 	Long:               "Send message to NMC Monitor",
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		currentTime := time.Now().Format("2006-01-02 15:04:05")
+		var cstZone = time.FixedZone("CST", 8*3600) // beijing
+		currentTime := time.Now().In(cstZone).Format("2006-01-02 15:04:05")
 
 		var sendFlagSet = pflag.NewFlagSet("send", pflag.ContinueOnError)
 		sendFlagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
@@ -40,7 +41,7 @@ var productionCmd = &cobra.Command{
 
 		sendFlagSet.StringVar(&source, "source", "", "message source")
 		sendFlagSet.StringVar(&sourceIP, "source-ip", "", "source IP")
-		sendFlagSet.StringVar(&messageType, "type", "GRAPES_PROD_GRIB", "message type")
+		sendFlagSet.StringVar(&messageType, "type", "", "message type")
 		sendFlagSet.Int8Var(&statusNo, "status", 0, "status")
 		sendFlagSet.StringVar(&datetimeString, "datetime", currentTime, "datetime, default is current time.")
 		sendFlagSet.StringVar(&fileName, "file-name", "", "file name")
@@ -100,7 +101,7 @@ var productionCmd = &cobra.Command{
 
 		var monitorMessageBlob []byte
 
-		if messageType == "GRAPES_PROD_GRIB" {
+		if len(messageType) >= 10 && messageType[len(messageType)-9:len(messageType)] == "PROD_GRIB" {
 			monitorMessageBlob, err = generateProdGribMessageV2(args)
 		} else {
 			log.Fatalf("message type is not supported: %s", messageType)
