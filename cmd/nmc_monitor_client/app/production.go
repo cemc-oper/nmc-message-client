@@ -33,52 +33,52 @@ var productionCmd = &cobra.Command{
 		var cstZone = time.FixedZone("CST", 8*3600) // beijing
 		currentTime := time.Now().In(cstZone)
 
-		var sendFlagSet = pflag.NewFlagSet("send", pflag.ContinueOnError)
-		sendFlagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
-		sendFlagSet.SortFlags = false
+		var flagSet = pflag.NewFlagSet("send", pflag.ContinueOnError)
+		flagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
+		flagSet.SortFlags = false
 
-		sendFlagSet.StringVar(&target, "target", "", "send targets, split by ','")
-		sendFlagSet.StringVar(&topic, "topic", "nwpcproduct", "message topic")
+		flagSet.StringVar(&target, "target", "", "send targets, split by ','")
+		flagSet.StringVar(&topic, "topic", "nwpcproduct", "message topic")
 
-		sendFlagSet.StringVar(&source, "source", "", "message source")
-		sendFlagSet.StringVar(&sourceIP, "source-ip", "", "source IP")
-		sendFlagSet.StringVar(&messageType, "type", "", "message type")
-		sendFlagSet.Int8Var(&statusNo, "status", 0, "status")
-		//sendFlagSet.StringVar(&datetimeString, "datetime", currentTime.Format("2006-01-02 15:04:05"), "datetime, default is current time.")
-		sendFlagSet.StringVar(&fileName, "file-name", "", "file name")
-		sendFlagSet.StringVar(&absoluteDataName, "absolute-data-name", "", "absolute data name")
-		sendFlagSet.Int64Var(&fileSize, "file-size", -1, "file size in bytes")
-		sendFlagSet.Int32Var(&productInterval, "product-interval", 1, "product interval, unit hour")
+		flagSet.StringVar(&source, "source", "", "message source")
+		flagSet.StringVar(&sourceIP, "source-ip", "", "source IP")
+		flagSet.StringVar(&messageType, "type", "", "message type")
+		flagSet.Int8Var(&statusNo, "status", 0, "status")
+		//flagSet.StringVar(&datetimeString, "datetime", currentTime.Format("2006-01-02 15:04:05"), "datetime, default is current time.")
+		flagSet.StringVar(&fileName, "file-name", "", "file name")
+		flagSet.StringVar(&absoluteDataName, "absolute-data-name", "", "absolute data name")
+		flagSet.Int64Var(&fileSize, "file-size", -1, "file size in bytes")
+		flagSet.Int32Var(&productInterval, "product-interval", 1, "product interval, unit hour")
 
-		sendFlagSet.BoolVar(&debug, "debug", false, "show debug information")
-		sendFlagSet.BoolVar(&disableSend, "disable-send", false, "disable message send.")
-		sendFlagSet.BoolVar(&ignoreError, "ignore-error", false,
+		flagSet.BoolVar(&debug, "debug", false, "show debug information")
+		flagSet.BoolVar(&disableSend, "disable-send", false, "disable message send.")
+		flagSet.BoolVar(&ignoreError, "ignore-error", false,
 			"ignore error. Should be open in operation systems.")
 
-		sendFlagSet.BoolVar(&help, "help", false,
+		flagSet.BoolVar(&help, "help", false,
 			"show help information.")
 
-		if err := sendFlagSet.Parse(args); err != nil {
+		if err := flagSet.Parse(args); err != nil {
 			cmd.Usage()
 			log.Fatal(err)
 		}
 
 		// check if there are non-flag arguments in the command line
-		cmds := sendFlagSet.Args()
+		cmds := flagSet.Args()
 		if len(cmds) > 0 {
 			cmd.Usage()
 			log.Fatalf("unknown command: %s", cmds[0])
 		}
 
 		// short-circuit on help
-		help, err := sendFlagSet.GetBool("help")
+		help, err := flagSet.GetBool("help")
 		if err != nil {
 			log.Fatal(`"help" flag is non-bool, programmer error, please correct`)
 		}
 
 		if help {
 			cmd.Help()
-			fmt.Printf("%s\n", sendFlagSet.FlagUsages())
+			fmt.Printf("%s\n", flagSet.FlagUsages())
 			return
 		}
 
@@ -101,10 +101,11 @@ var productionCmd = &cobra.Command{
 			fmt.Printf("Build at %s\n", BuildTime)
 		}
 
-		var monitorMessageBlob []byte
+		// create message blob
+		var messageBlob []byte
 
 		if len(messageType) >= 4 && messageType[len(messageType)-4:len(messageType)] == "Prod" {
-			monitorMessageBlob, err = generateProdGribMessageV2(
+			messageBlob, err = generateProductMessage(
 				args,
 				currentTime,
 			)
@@ -125,7 +126,7 @@ var productionCmd = &cobra.Command{
 
 		if debug {
 			fmt.Printf("message:\n")
-			fmt.Printf("%s\n", monitorMessageBlob)
+			fmt.Printf("%s\n", messageBlob)
 		}
 
 		if disableSend {
@@ -146,7 +147,7 @@ var productionCmd = &cobra.Command{
 			Debug: debug,
 		}
 
-		err = s.SendMessage(monitorMessageBlob)
+		err = s.SendMessage(messageBlob)
 
 		if err != nil {
 			f := os.Stderr
@@ -161,21 +162,21 @@ var productionCmd = &cobra.Command{
 	},
 }
 
-func generateProdGribMessageV2(args []string, currentTime time.Time) ([]byte, error) {
+func generateProductMessage(args []string, currentTime time.Time) ([]byte, error) {
 	var startTime = ""
 	var forecastTime = ""
 
-	var prodGribFlagSet = pflag.NewFlagSet("prod_grid", pflag.ContinueOnError)
-	prodGribFlagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
-	prodGribFlagSet.SortFlags = false
+	var gribFlagSet = pflag.NewFlagSet("prod_grid", pflag.ContinueOnError)
+	gribFlagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
+	gribFlagSet.SortFlags = false
 
-	prodGribFlagSet.StringVar(&startTime, "start-time", "", "start time, such as 2019062400")
-	prodGribFlagSet.StringVar(&forecastTime, "forecast-time", "", "forecast time, such as 000")
-	if err := prodGribFlagSet.Parse(args); err != nil {
+	gribFlagSet.StringVar(&startTime, "start-time", "", "start time, such as 2019062400")
+	gribFlagSet.StringVar(&forecastTime, "forecast-time", "", "forecast time, such as 000")
+	if err := gribFlagSet.Parse(args); err != nil {
 		log.Fatalf("argument parse fail: %s", err)
 	}
 
-	monitorMessageBlob, err := nmc_message_client.CreateProdGribMessageV2(
+	messageBlob, err := nmc_message_client.CreateProductMessage(
 		topic,
 		source,
 		sourceIP,
@@ -189,5 +190,5 @@ func generateProdGribMessageV2(args []string, currentTime time.Time) ([]byte, er
 		startTime,
 		forecastTime)
 
-	return monitorMessageBlob, err
+	return messageBlob, err
 }

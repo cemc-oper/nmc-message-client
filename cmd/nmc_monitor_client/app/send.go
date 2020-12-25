@@ -38,7 +38,7 @@ func init() {
 var sendCmd = &cobra.Command{
 	Use:                "send",
 	Short:              "Send message to NMC Monitor",
-	Long:               "Send message to NMC Monitor",
+	Long:               "Send message to NMC Monitor. This command will be deprecated from v0.3.0 and will be dropped out from 2021.",
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		currentTimeStamp := makeTimestamp()

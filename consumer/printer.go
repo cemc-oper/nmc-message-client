@@ -17,7 +17,7 @@ type PrinterConsumer struct {
 }
 
 func (s *PrinterConsumer) ConsumeMessages() error {
-	// create connection to rabbitmq
+	// create connection
 	err := s.Source.CreateConnection()
 	if err != nil {
 		if s.Source.Reader != nil {
@@ -28,7 +28,7 @@ func (s *PrinterConsumer) ConsumeMessages() error {
 
 	defer s.Source.Reader.Close()
 
-	// consume messages from rabbitmq
+	// consume messages
 	log.WithFields(log.Fields{
 		"component": "kafka",
 		"event":     "consume",
@@ -46,17 +46,17 @@ func (s *PrinterConsumer) ConsumeMessages() error {
 				"event":     "consume",
 			}).Warnf("can't parse message: %v", err)
 		}
-		if !isProductionGribMessageV2(message) {
+		if !isProductMessage(message) {
 			continue
 		}
 
-		printProdGribMessage(message, m)
+		printProductMessage(message, m)
 	}
 
 	return nil
 }
 
-func printProdGribMessage(message nmc_message_client.MonitorMessageV2, m kafka.Message) {
+func printProductMessage(message nmc_message_client.MonitorMessageV2, m kafka.Message) {
 	var des nmc_message_client.ProbGribMessageDescription
 	err := json.Unmarshal([]byte(message.ResultDescription), &des)
 	if err != nil {
@@ -75,6 +75,6 @@ func printProdGribMessage(message nmc_message_client.MonitorMessageV2, m kafka.M
 	)
 }
 
-func isProductionGribMessageV2(message nmc_message_client.MonitorMessageV2) bool {
+func isProductMessage(message nmc_message_client.MonitorMessageV2) bool {
 	return true
 }

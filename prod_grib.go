@@ -27,7 +27,7 @@ func CreateProdGribMessage(
 		return nil, fmt.Errorf("create description for prod-grib error: %s", err)
 	}
 
-	monitorMessage := MonitorMessage{
+	message := MonitorMessage{
 		Source:           source,
 		MessageType:      messageType,
 		Status:           status,
@@ -37,13 +37,13 @@ func CreateProdGribMessage(
 		Description:      string(descriptionBlob),
 	}
 
-	monitorMessageBlob, err := json.MarshalIndent(monitorMessage, "", "  ")
+	messageBlob, err := json.MarshalIndent(message, "", "  ")
 
 	if err != nil {
-		return monitorMessageBlob, fmt.Errorf("create message for prod-grib error: %s", err)
+		return messageBlob, fmt.Errorf("create message for prod-grib error: %s", err)
 	}
 
-	return monitorMessageBlob, nil
+	return messageBlob, nil
 }
 
 type ProbGribMessageDescription struct {
@@ -62,7 +62,7 @@ type GribProduction struct {
 	ForecastTime string    `json:"forecastTime,omitempty"`
 }
 
-func CreateProdGribMessageV2(
+func CreateProductMessage(
 	topic string,
 	source string,
 	sourceIP string,
@@ -93,7 +93,7 @@ func CreateProdGribMessageV2(
 		return nil, fmt.Errorf("create description for prod-grib error: %s", err)
 	}
 
-	monitorMessage := MonitorMessageV2{
+	message := MonitorMessageV2{
 		Topic:             topic,
 		Source:            source,
 		SourceIP:          sourceIP,
@@ -106,12 +106,12 @@ func CreateProdGribMessageV2(
 		ResultDescription: string(descriptionBlob),
 	}
 
-	monitorMessage.ID = fmt.Sprintf(
+	message.ID = fmt.Sprintf(
 		"%s%05d",
 		dateTime.Format("20060102150405"),
 		dateTime.Nanosecond()/10000,
 	)
-	monitorMessage.PID = fmt.Sprintf(
+	message.PID = fmt.Sprintf(
 		"%s00%02d%04d%04d%04d",
 		messageType,
 		startTimeClock.Hour(),
@@ -120,11 +120,11 @@ func CreateProdGribMessageV2(
 		randomNumber,
 	)
 
-	monitorMessageBlob, err := json.MarshalIndent(monitorMessage, "", "  ")
+	messageBlob, err := json.MarshalIndent(message, "", "  ")
 
 	if err != nil {
-		return monitorMessageBlob, fmt.Errorf("create message for prod-grib error: %s", err)
+		return messageBlob, fmt.Errorf("create message for prod-grib error: %s", err)
 	}
 
-	return monitorMessageBlob, nil
+	return messageBlob, nil
 }
