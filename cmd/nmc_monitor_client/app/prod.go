@@ -13,10 +13,11 @@ import (
 )
 
 var (
-	sourceIP       string
-	fileSize       int64
-	statusNo       int8
-	datetimeString string
+	sourceIP        string
+	fileSize        int64
+	statusNo        int8
+	datetimeString  string
+	productInterval int32
 )
 
 func init() {
@@ -30,23 +31,24 @@ var productionCmd = &cobra.Command{
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		var cstZone = time.FixedZone("CST", 8*3600) // beijing
-		currentTime := time.Now().In(cstZone).Format("2006-01-02 15:04:05")
+		currentTime := time.Now().In(cstZone)
 
 		var sendFlagSet = pflag.NewFlagSet("send", pflag.ContinueOnError)
 		sendFlagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
 		sendFlagSet.SortFlags = false
 
 		sendFlagSet.StringVar(&target, "target", "", "send targets, split by ','")
-		sendFlagSet.StringVar(&topic, "topic", "dataproduce", "message topic")
+		sendFlagSet.StringVar(&topic, "topic", "nwpcproduct", "message topic")
 
 		sendFlagSet.StringVar(&source, "source", "", "message source")
 		sendFlagSet.StringVar(&sourceIP, "source-ip", "", "source IP")
 		sendFlagSet.StringVar(&messageType, "type", "", "message type")
 		sendFlagSet.Int8Var(&statusNo, "status", 0, "status")
-		sendFlagSet.StringVar(&datetimeString, "datetime", currentTime, "datetime, default is current time.")
+		//sendFlagSet.StringVar(&datetimeString, "datetime", currentTime.Format("2006-01-02 15:04:05"), "datetime, default is current time.")
 		sendFlagSet.StringVar(&fileName, "file-name", "", "file name")
 		sendFlagSet.StringVar(&absoluteDataName, "absolute-data-name", "", "absolute data name")
 		sendFlagSet.Int64Var(&fileSize, "file-size", -1, "file size in bytes")
+		sendFlagSet.Int32Var(&productInterval, "product-interval", 1, "product interval, unit hour")
 
 		sendFlagSet.BoolVar(&debug, "debug", false, "show debug information")
 		sendFlagSet.BoolVar(&disableSend, "disable-send", false, "disable message send.")
@@ -101,8 +103,11 @@ var productionCmd = &cobra.Command{
 
 		var monitorMessageBlob []byte
 
-		if len(messageType) >= 10 && messageType[len(messageType)-9:len(messageType)] == "PROD_GRIB" {
-			monitorMessageBlob, err = generateProdGribMessageV2(args)
+		if len(messageType) >= 4 && messageType[len(messageType)-4:len(messageType)] == "Prod" {
+			monitorMessageBlob, err = generateProdGribMessageV2(
+				args,
+				currentTime,
+			)
 		} else {
 			log.Fatalf("message type is not supported: %s", messageType)
 		}
@@ -156,7 +161,7 @@ var productionCmd = &cobra.Command{
 	},
 }
 
-func generateProdGribMessageV2(args []string) ([]byte, error) {
+func generateProdGribMessageV2(args []string, currentTime time.Time) ([]byte, error) {
 	var startTime = ""
 	var forecastTime = ""
 
@@ -175,10 +180,11 @@ func generateProdGribMessageV2(args []string) ([]byte, error) {
 		source,
 		sourceIP,
 		messageType,
-		datetimeString,
+		currentTime,
 		fileName,
 		absoluteDataName,
 		fileSize,
+		productInterval,
 		statusNo,
 		startTime,
 		forecastTime)
