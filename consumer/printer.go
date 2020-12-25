@@ -7,7 +7,6 @@ import (
 	nmc_message_client "github.com/nwpc-oper/nmc-message-client"
 	"github.com/segmentio/kafka-go"
 	log "github.com/sirupsen/logrus"
-	"time"
 )
 
 type PrinterConsumer struct {
@@ -39,7 +38,7 @@ func (s *PrinterConsumer) ConsumeMessages() error {
 		if err != nil {
 			break
 		}
-		var message nmc_message_client.MonitorMessage
+		var message nmc_message_client.MonitorMessageV2
 		err = json.Unmarshal(m.Value, &message)
 		if err != nil {
 			log.WithFields(log.Fields{
@@ -47,7 +46,7 @@ func (s *PrinterConsumer) ConsumeMessages() error {
 				"event":     "consume",
 			}).Warnf("can't parse message: %v", err)
 		}
-		if !isProductionGribMessage(message) {
+		if !isProductionGribMessageV2(message) {
 			continue
 		}
 
@@ -57,9 +56,9 @@ func (s *PrinterConsumer) ConsumeMessages() error {
 	return nil
 }
 
-func printProdGribMessage(message nmc_message_client.MonitorMessage, m kafka.Message) {
+func printProdGribMessage(message nmc_message_client.MonitorMessageV2, m kafka.Message) {
 	var des nmc_message_client.ProbGribMessageDescription
-	err := json.Unmarshal([]byte(message.Description), &des)
+	err := json.Unmarshal([]byte(message.ResultDescription), &des)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"component": "kafka",
@@ -67,13 +66,15 @@ func printProdGribMessage(message nmc_message_client.MonitorMessage, m kafka.Mes
 		}).Warnf("can't parse description: %v", err)
 	}
 
-	dateTime := time.Unix(message.DateTime/1000, 0)
-
 	fmt.Printf("[%d][%s][%s][prod_grib] %s +%s \n",
 		m.Offset,
-		dateTime.Format("2006-01-02 15:04:05"),
+		message.DateTime,
 		message.Source,
 		des.StartTime,
 		des.ForecastTime,
 	)
+}
+
+func isProductionGribMessageV2(message nmc_message_client.MonitorMessageV2) bool {
+	return true
 }

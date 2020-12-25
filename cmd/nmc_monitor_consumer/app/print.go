@@ -32,9 +32,10 @@ var printCommand = &cobra.Command{
 		printFlagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
 		printFlagSet.SortFlags = false
 
-		printFlagSet.StringVar(&server, "server", "", "kafka servers, split by ','")
-		printFlagSet.StringVar(&topic, "topic", "monitor", "message topic")
-		printFlagSet.Int64Var(&offset, "offset", 0, "message offset")
+		printFlagSet.StringVar(&server, "kafka-server", "", "kafka servers, split by ','")
+		printFlagSet.StringVar(&topic, "kafka-topic", "nwpcproduct", "message topic")
+		printFlagSet.Int64Var(&offset, "kafka-offset", 0, "message offset")
+		printFlagSet.StringVar(&groupId, "kafka-group-id", "", "group id")
 
 		printFlagSet.BoolVar(&debug, "debug", false, "show debug information")
 
@@ -81,6 +82,7 @@ var printCommand = &cobra.Command{
 				Brokers: serverList,
 				Topic:   topic,
 				Offset:  offset,
+				GroupId: groupId,
 			},
 			WorkerCount:  0,
 			ConsumerName: "printer",
