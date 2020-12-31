@@ -65,13 +65,16 @@ func (s *ProductionConsumer) ConsumeMessages() error {
 	return nil
 }
 
-func (s *ProductionConsumer) readFromKafka(messageChannel chan nmc_message_client.GribProduction, done chan bool) {
+func (s *ProductionConsumer) readFromKafka(
+	messageChannel chan nmc_message_client.GribProduction,
+	done chan bool,
+) {
 	for {
 		m, err := s.Source.Reader.ReadMessage(context.Background())
 		if err != nil {
 			break
 		}
-		var message nmc_message_client.MonitorMessage
+		var message nmc_message_client.MonitorMessageV2
 		err = json.Unmarshal(m.Value, &message)
 		if err != nil {
 			log.WithFields(log.Fields{
@@ -79,6 +82,7 @@ func (s *ProductionConsumer) readFromKafka(messageChannel chan nmc_message_clien
 				"event":     "consume",
 			}).Warnf("can't parse message: %v", err)
 		}
+
 		if !isProductionGribMessage(message) {
 			continue
 		}
@@ -208,27 +212,22 @@ func (s *ProductionConsumer) consumeProdGribMessageToElastic(
 	}
 }
 
-func isProductionGribMessage(message nmc_message_client.MonitorMessage) bool {
-	source := message.Source
-	if len(source) < 5 || source[:5] != "nwpc_" {
-		return false
-	}
-
-	if message.MessageType != "prod_grib" {
-		return false
-	}
+func isProductionGribMessage(message nmc_message_client.MonitorMessageV2) bool {
 	return true
 }
 
 func getIndexForProductionMessage(message nmc_message_client.GribProduction) string {
 	messageTime := message.DateTime
-	indexName := fmt.Sprintf("nmc-prod-%s", messageTime.Format("2006-01"))
+	indexName := fmt.Sprintf("nmc-product-%s", messageTime.Format("2006-01"))
 	return indexName
 }
 
-func generateGribProduction(message nmc_message_client.MonitorMessage, m kafka.Message) (nmc_message_client.GribProduction, error) {
+func generateGribProduction(
+	message nmc_message_client.MonitorMessageV2,
+	m kafka.Message,
+) (nmc_message_client.GribProduction, error) {
 	var des nmc_message_client.ProbGribMessageDescription
-	err := json.Unmarshal([]byte(message.Description), &des)
+	err := json.Unmarshal([]byte(message.ResultDescription), &des)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"component": "production",
@@ -246,15 +245,22 @@ func generateGribProduction(message nmc_message_client.MonitorMessage, m kafka.M
 		return nmc_message_client.GribProduction{}, err
 	}
 
-	dateTime := time.Unix(message.DateTime/1000, 0)
+	dateTime, err := time.Parse("2006-01-02 15:04:05", message.DateTime)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"component": "production",
+			"event":     "generateGribProduction",
+		}).Warnf("can't parse DateTime: %v", err)
+		return nmc_message_client.GribProduction{}, err
+	}
 
 	p := nmc_message_client.GribProduction{
 		Offset:       strconv.Itoa(int(m.Offset)),
 		Source:       message.Source,
 		MessageType:  message.MessageType,
-		Status:       message.Status,
+		Status:       message.Result,
 		DateTime:     dateTime,
-		FileName:     message.FileName,
+		FileName:     message.FileNames,
 		StartTime:    startTime,
 		ForecastTime: des.ForecastTime,
 	}

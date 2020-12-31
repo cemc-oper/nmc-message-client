@@ -55,7 +55,7 @@ type GribProduction struct {
 	Offset       string    `json:"-"`
 	Source       string    `json:"source"`
 	MessageType  string    `json:"type"`
-	Status       string    `json:"status"`
+	Status       int8      `json:"status"`
 	DateTime     time.Time `json:"datetime,omitempty"`
 	FileName     string    `json:"fileName"`
 	StartTime    time.Time `json:"startTime,omitempty"`

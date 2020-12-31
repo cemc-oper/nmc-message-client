@@ -24,45 +24,45 @@ var elasticSearchCommand = &cobra.Command{
 	Long:               "Send messages to ElasticSearch",
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		var printFlagSet = pflag.NewFlagSet("elasticsearch", pflag.ContinueOnError)
-		printFlagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
-		printFlagSet.SortFlags = false
+		var flagSet = pflag.NewFlagSet("elasticsearch", pflag.ContinueOnError)
+		flagSet.ParseErrorsWhitelist = pflag.ParseErrorsWhitelist{UnknownFlags: true}
+		flagSet.SortFlags = false
 
-		printFlagSet.StringVar(&server, "kafka-server", "", "kafka servers, split by ','")
-		printFlagSet.StringVar(&topic, "kafka-topic", "monitor", "message topic")
-		printFlagSet.Int64Var(&offset, "kafka-offset", 0, "message offset")
-		printFlagSet.StringVar(&groupId, "kafka-group-id", "", "group id")
+		flagSet.StringVar(&server, "kafka-server", "", "kafka servers, split by ','")
+		flagSet.StringVar(&topic, "kafka-topic", "nwpcproduct", "message topic")
+		flagSet.Int64Var(&offset, "kafka-offset", 0, "message offset")
+		flagSet.StringVar(&groupId, "kafka-group-id", "", "group id")
 
-		printFlagSet.StringVar(&elasticServer,
+		flagSet.StringVar(&elasticServer,
 			"elasticsearch-server", "", "elasticsearch server")
-		printFlagSet.IntVar(&bulkSize, "bulk-size", 50, "bulk size")
+		flagSet.IntVar(&bulkSize, "bulk-size", 50, "bulk size")
 
-		printFlagSet.BoolVar(&debug, "debug", false, "show debug information")
+		flagSet.BoolVar(&debug, "debug", false, "show debug information")
 
-		printFlagSet.BoolVar(&help, "help", false,
+		flagSet.BoolVar(&help, "help", false,
 			"show help information.")
 
-		if err := printFlagSet.Parse(args); err != nil {
+		if err := flagSet.Parse(args); err != nil {
 			cmd.Usage()
 			log.Fatal(err)
 		}
 
 		// check if there are non-flag arguments in the command line
-		cmds := printFlagSet.Args()
+		cmds := flagSet.Args()
 		if len(cmds) > 0 {
 			cmd.Usage()
 			log.Fatalf("unknown command: %s", cmds[0])
 		}
 
 		// short-circuit on help
-		help, err := printFlagSet.GetBool("help")
+		help, err := flagSet.GetBool("help")
 		if err != nil {
 			log.Fatal(`"help" flag is non-bool, programmer error, please correct`)
 		}
 
 		if help {
 			cmd.Help()
-			fmt.Printf("%s\n", printFlagSet.FlagUsages())
+			fmt.Printf("%s\n", flagSet.FlagUsages())
 			return
 		}
 
