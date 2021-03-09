@@ -88,10 +88,10 @@ func CreateProductMessage(
 		StartTime:    startTime,
 		ForecastTime: forecastTime,
 	}
-	descriptionBlob, err := json.Marshal(description)
-	if err != nil {
-		return nil, fmt.Errorf("create description for prod-grib error: %s", err)
-	}
+	//descriptionBlob, err := json.Marshal(description)
+	//if err != nil {
+	//	return nil, fmt.Errorf("create description for prod-grib error: %s", err)
+	//}
 
 	message := MonitorMessageV2{
 		Topic:             topic,
@@ -103,7 +103,7 @@ func CreateProductMessage(
 		FileNames:         fileName,
 		AbsoluteDataName:  absoluteDataName,
 		FileSizes:         fmt.Sprintf("%d", fileSize),
-		ResultDescription: string(descriptionBlob),
+		ResultDescription: description,
 	}
 
 	message.ID = fmt.Sprintf(

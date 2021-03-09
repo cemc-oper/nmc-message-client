@@ -58,14 +58,6 @@ func (s *PrinterConsumer) ConsumeMessages() error {
 
 func printProductMessage(message nmc_message_client.MonitorMessageV2, m kafka.Message) {
 	var des nmc_message_client.ProbGribMessageDescription
-	err := json.Unmarshal([]byte(message.ResultDescription), &des)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"component": "kafka",
-			"event":     "consume",
-		}).Warnf("can't parse description: %v", err)
-	}
-
 	fmt.Printf("[%d][%s][%s][prod_grib] %s +%s \n",
 		m.Offset,
 		message.DateTime,

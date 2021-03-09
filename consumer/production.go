@@ -226,15 +226,15 @@ func generateGribProduction(
 	message nmc_message_client.MonitorMessageV2,
 	m kafka.Message,
 ) (nmc_message_client.GribProduction, error) {
-	var des nmc_message_client.ProbGribMessageDescription
-	err := json.Unmarshal([]byte(message.ResultDescription), &des)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"component": "production",
-			"event":     "generateGribProduction",
-		}).Warnf("can't parse description: %v", err)
-		return nmc_message_client.GribProduction{}, err
-	}
+	des := message.ResultDescription.(nmc_message_client.ProbGribMessageDescription)
+	//err := json.Unmarshal([]byte(message.ResultDescription), &des)
+	//if err != nil {
+	//	log.WithFields(log.Fields{
+	//		"component": "production",
+	//		"event":     "generateGribProduction",
+	//	}).Warnf("can't parse description: %v", err)
+	//	return nmc_message_client.GribProduction{}, err
+	//}
 
 	startTime, err := time.Parse("2006010215", des.StartTime)
 	if err != nil {
