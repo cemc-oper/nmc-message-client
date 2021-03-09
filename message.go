@@ -11,16 +11,16 @@ type MonitorMessage struct {
 }
 
 type MonitorMessageV2 struct {
-	Topic             string      `json:"topic"`
-	Source            string      `json:"source"`
-	SourceIP          string      `json:"sourceIP"`
-	MessageType       string      `json:"type"`
-	PID               string      `json:"PID"`
-	ID                string      `json:"ID"`
-	DateTime          string      `json:"datetime,omitempty"`
-	FileNames         string      `json:"fileNames"`
-	AbsoluteDataName  string      `json:"absoluteDataName,omitempty"`
-	FileSizes         string      `json:"fileSizes"`
-	Result            int8        `json:"result"`
-	ResultDescription interface{} `json:"resultDesc"`
+	Topic             string                     `json:"topic"`
+	Source            string                     `json:"source"`
+	SourceIP          string                     `json:"sourceIP"`
+	MessageType       string                     `json:"type"`
+	PID               string                     `json:"PID"`
+	ID                string                     `json:"ID"`
+	DateTime          string                     `json:"datetime,omitempty"`
+	FileNames         string                     `json:"fileNames"`
+	AbsoluteDataName  string                     `json:"absoluteDataName,omitempty"`
+	FileSizes         string                     `json:"fileSizes"`
+	Result            int8                       `json:"result"`
+	ResultDescription ProbGribMessageDescription `json:"resultDesc"`
 }

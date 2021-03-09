@@ -226,7 +226,7 @@ func generateGribProduction(
 	message nmc_message_client.MonitorMessageV2,
 	m kafka.Message,
 ) (nmc_message_client.GribProduction, error) {
-	des := message.ResultDescription.(nmc_message_client.ProbGribMessageDescription)
+	des := message.ResultDescription
 	//err := json.Unmarshal([]byte(message.ResultDescription), &des)
 	//if err != nil {
 	//	log.WithFields(log.Fields{
