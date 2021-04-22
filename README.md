@@ -1,6 +1,6 @@
 # nmc-message-client
 
-A message client for NWPC operation systems.
+A message client for NWPC operation systems using NMC monitoring platform.
 
 ## Installing
 
@@ -19,35 +19,47 @@ Use different tools to send messages to different message system.
 Send message to NMC Monitor Platform using `nmc_monitor_client send` command.
 
 ```shell script
-nmc_monitor_client send \
-	--target 10.20.67.183:9092,10.20.67.216:9092,10.20.67.217:9092 \
-	--source nwpc_grapes_gfs \
-	--type prod_grib \
-	--status 0 \
-	--file-name gmf.gra.2019062400006.grb2 \
-	--absolute-data-name /g2/nwp_pd/NWP_PST_DATA/GMF_GRAPES_GFS_POST/togrib2/output_togrib2/2019062400/gmf.gra.2019062400006.grb2 \
-	--start-time 2019062400 \
-	--forecast-time 006 \
-	--debug
+nmc_monitor_client \
+  production \
+  --target "host:port" \
+  --source grapesGfs \
+  --source-ip "source ip" \
+  --type gfsProd \
+  --product-interval 3 \
+  --file-name gmf.gra.2021042200000.grb2 \
+  --absolute-data-name /g2/nwp_pd/NWP_GRAPES_GFS_GMF_POST_DATA/2021042200/togrib2/output/grib2_orig/gmf.gra.2021042200000.grb2 \
+  --file-size 354884036 \
+  --start-time 2021042200 \
+  --forecast-time 000 \
+  --status 0 \
+  --ignore-error \
+  --debug
 ```
 
-The command above will send message below to NMC Monitor Platform's kafka server (10.20.90.35:9092) 
-with default topic monitor.
+The command above will send message below to NMC Monitor Platform's kafka server with default topic monitor.
 
 ```json
 {
-	"source":"nwpc_grapes_gfs",
-	"type":"prod_grib",
-	"status":"0",
-	"datetime":1561363080430,
-	"fileName":"gmf.gra.2019062400006.grb2",
-	"absoluteDataName":"/g2/nwp_pd/NWP_PST_DATA/GMF_GRAPES_GFS_POST/togrib2/output_togrib2/2019062400/gmf.gra.2019062400006.grb2",
-	"desc":"{\"start_time\":\"2019062400\",\"forecast_time\":\"006\"}"
+  "topic": "nwpcproduct",
+  "source": "grapesGfs",
+  "sourceIP": "10.40.143.29",
+  "type": "gfsProd",
+  "PID": "gfsProd0008000000038081",
+  "ID": "2021042212421559780",
+  "datetime": "2021-04-22 12:42:15",
+  "fileNames": "gmf.gra.2021042200000.grb2",
+  "absoluteDataName": "/g2/nwp_pd/NWP_GRAPES_GFS_GMF_POST_DATA/2021042200/togrib2/output/grib2_orig/gmf.gra.2021042200000.grb2",
+  "fileSizes": "354884036",
+  "result": 0,
+  "resultDesc": {
+    "startTime": "2021042200",
+    "forecastTime": "000"
+  }
 }
 ```
 
 ## License
 
-Copyright &copy; 2019-2020, Perilla Roc at nwpc-oper.
+Copyright &copy; 2019-2021, Perilla Roc at nwpc-oper.
 
 `nmc-message-client` is licensed under [MIT License](LICENSE)

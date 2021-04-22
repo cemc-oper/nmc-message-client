@@ -1,0 +1,17 @@
+{
+  "topic": "nwpcproduct",
+  "source": "grapesGfs",
+  "sourceIP": "10.40.142.27",
+  "type": "gfsProd",
+  "PID": "gfsProd0008002400038081",
+  "ID": "2020122509095318005",
+  "datetime": "2020-12-25 09:09:53",
+  "fileNames": "gmf.gra.2020122300024.grb2",
+  "absoluteDataName": "/g2/nwp_pd/NWP_GRAPES_GFS_GMF_POST_DATA/2020122300/togrib2/024/gmf.gra.2020122300024.grb2",
+  "fileSizes": "437801456",
+  "result": 0,
+  "resultDesc": {
+    "startTime": "2020122300",
+    "forecastTime": "024"
+  }
+}
