@@ -109,7 +109,7 @@ func CreateProductMessage(
 	message.ID = fmt.Sprintf(
 		"%s%05d",
 		dateTime.Format("20060102150405"),
-		dateTime.Nanosecond()/10000,
+		rand.Intn(100000),
 	)
 	message.PID = fmt.Sprintf(
 		"%s00%02d%04d%04d%04d",
